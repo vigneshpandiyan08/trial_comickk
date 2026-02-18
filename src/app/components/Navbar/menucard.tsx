@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +10,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import md5 from "blueimp-md5";
+import { useAuth } from "@/app/context/AuthContext";
+import Link from "next/link";
 
-export default function MenuCard({ email }: { email: string }) {
+export default function MenuCard() {
+  const { user, logout } = useAuth();
+
+  // For guests, use a default email for gravatar
+  const email = user?.email || "guest@example.com";
   const hash = md5(email.trim().toLowerCase());
   const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=200&d=identicon`;
 
@@ -24,13 +32,32 @@ export default function MenuCard({ email }: { email: string }) {
           className="rounded-full object-cover"
         />
       </DropdownMenuTrigger>
+
       <DropdownMenuContent className="p-2 m-1 min-w-[150px]">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Dashboard</DropdownMenuItem>
-        <DropdownMenuItem>Settings</DropdownMenuItem>
-        <DropdownMenuItem>Logout</DropdownMenuItem>
+
+        {user ? (
+          <>
+            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem>Dashboard</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem>
+              <Link href="/signin" className="w-full block">
+                Login
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/signup" className="w-full block">
+                Sign Up
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
